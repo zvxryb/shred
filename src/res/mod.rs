@@ -136,6 +136,7 @@ macro_rules! impl_resource_for_tuple {
                 Box::new(($(self.$idx.clone(),)*))
             }
 
+            #[allow(unused_variable)]
             fn clone_resource_from(&mut self, other: &Resource) {
                 $(
                     self.$idx.clone_from(&other.downcast_ref::<Self>().unwrap().$idx);
@@ -144,7 +145,9 @@ macro_rules! impl_resource_for_tuple {
         }
     };
 
-    () => {};
+    () => {
+        impl_resource_for_tuple!{resource:}
+    };
 
     ($head_idx:tt $head_type:ident; $($tail_idx:tt $tail_type:ident;)*) => {
         impl_resource_for_tuple!{resource: $head_idx $head_type; $($tail_idx $tail_type;)*}
