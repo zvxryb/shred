@@ -2,12 +2,12 @@ extern crate shred;
 #[macro_use]
 extern crate shred_derive;
 
-use shred::{Read, Resources, SystemData, Write};
+use shred::{Read, Resource, Resources, SystemData, Write};
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone, Resource)]
 struct ResA;
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone, Resource)]
 struct ResB;
 
 #[derive(SystemData)]

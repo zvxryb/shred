@@ -1,14 +1,17 @@
 extern crate shred;
+#[macro_use]
+extern crate shred_derive;
 
-use shred::{DispatcherBuilder, Read, ReadExpect, Resources, System, Write};
+use shred::{DispatcherBuilder, Read, ReadExpect, Resource, Resources, System, Write};
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone, Resource)]
 struct ResA;
 
 // `ResB` does not implement `Default`.
-#[derive(Debug)]
+#[derive(Debug, Clone, Resource)]
 struct ResB;
 
+#[derive(Clone, Resource)]
 struct ResWithoutSensibleDefault {
     magic_number_that_we_cant_compute: u32,
 }

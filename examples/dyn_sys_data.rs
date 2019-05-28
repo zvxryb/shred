@@ -5,6 +5,8 @@
 //! It does that by implementing `DynamicSystemData` and using `MetaTable`.
 
 extern crate shred;
+#[macro_use]
+extern crate shred_derive;
 
 // in a real application you would use `fnv`
 use std::collections::HashMap;
@@ -112,6 +114,7 @@ where
 type ReflectionTable = MetaTable<Reflection>;
 
 /// Maps resource names to resource ids.
+#[derive(Debug, Default, Clone, Resource)]
 struct ResourceTable {
     map: HashMap<String, ResourceId>,
 }
@@ -205,7 +208,7 @@ fn create_script_sys(res: &Resources) -> DynamicSystem {
 
 fn main() {
     /// Some resource
-    #[derive(Debug, Default)]
+    #[derive(Debug, Default, Clone, Resource)]
     struct Foo;
 
     impl Reflection for Foo {
@@ -219,7 +222,7 @@ fn main() {
     }
 
     /// Another resource
-    #[derive(Debug, Default)]
+    #[derive(Debug, Default, Clone, Resource)]
     struct Bar;
 
     impl Reflection for Bar {

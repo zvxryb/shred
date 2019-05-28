@@ -146,3 +146,36 @@ fn gen_from_body(ast: &Data, name: &Ident) -> (proc_macro2::TokenStream, Vec<Typ
 
     (fetch_return, tys)
 }
+
+#[proc_macro_derive(Resource)]
+pub fn resource(input: TokenStream) -> TokenStream {
+    let ast = syn::parse(input).unwrap();
+
+    let gen = impl_resource(&ast);
+
+    gen.into()
+}
+
+fn impl_resource(ast: &DeriveInput) -> proc_macro2::TokenStream {
+    let name = &ast.ident;
+    let generics = &ast.generics;
+
+    let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
+
+    quote! {
+        //impl_resource!{#name, (#impl_generics), (#ty_generics), (#where_clause)}
+        impl #impl_generics
+            ::shred::Resource
+            for #name #ty_generics #where_clause
+        {
+            fn clone_resource(&self) -> Box<Resource> {
+                ::std::boxed::Box::new(::std::clone::Clone::clone(self))
+            }
+
+            fn clone_resource_from(&mut self, other: &Resource) {
+                ::std::clone::Clone::clone_from(self,
+                    other.downcast_ref::<#name>().unwrap())
+            }
+        }
+    }
+}

@@ -14,6 +14,27 @@ use mopa::Any;
 use self::entry::create_entry;
 use cell::{Ref, RefMut, TrustCell};
 
+macro_rules! impl_resource {
+    ($name:ty, ($($impl_generics:tt)*), ($($ty_generics:tt)*), ($($where_clause:tt)*)) => {
+        impl $($impl_generics)*
+            ::res::Resource
+            for $name $($ty_generics)* $($where_clause)*
+        {
+            fn clone_resource(&self) -> Box<::res::Resource> {
+                Box::new(self.clone())
+            }
+
+            fn clone_resource_from(&mut self, other: &::res::Resource) {
+                self.clone_from(other.downcast_ref::<$name>().unwrap())
+            }
+        }
+    };
+    
+    ($name:ty) => {
+        impl_resource!{$name, (), (), ()}
+    };
+}
+
 mod data;
 mod entry;
 #[macro_use]
@@ -77,14 +98,79 @@ where
 /// A resource defines a set of data
 /// which can only be accessed according
 /// to Rust's typical borrowing model (one writer xor multiple readers).
-pub trait Resource: Any + Send + Sync + 'static {}
+pub trait Resource: Any + Send + Sync + 'static {
+    /// Clones a resource
+    fn clone_resource(&self) -> Box<Resource>;
+
+    /// Clones in-place from another resource; this may panic if other resource differs in type
+    fn clone_resource_from(&mut self, other: &Resource);
+}
 
 mopafy!(Resource);
 
-impl<T> Resource for T
-where
-    T: Any + Send + Sync,
-{
+macro_rules! impl_resource_for_primitives {
+    ($($type:ty)*) => {
+        $(
+            impl Resource for $type {
+                fn clone_resource(&self) -> Box<Resource> {
+                    Box::new(self.clone())
+                }
+
+                fn clone_resource_from(&mut self, other: &Resource) {
+                    self.clone_from(other.downcast_ref::<$type>().unwrap())
+                }
+            }
+        )*
+    };
+}
+
+impl_resource_for_primitives!{
+    i8 i16 i32 i64 i128 isize
+    u8 u16 u32 u64 u128 usize
+    f32 f64 bool char
+}
+
+macro_rules! impl_resource_for_tuple {
+    (resource: $($idx:tt $type:ident;)*) => {
+        impl<$($type,)*> Resource for ($($type,)*)
+        where
+            $(
+                $type: Clone + Send + Sync + 'static,
+            )*
+        {
+            #[allow(unused_parens)]
+            fn clone_resource(&self) -> Box<Resource> {
+                Box::new(($(self.$idx.clone(),)*))
+            }
+
+            fn clone_resource_from(&mut self, other: &Resource) {
+                $(
+                    self.$idx.clone_from(&other.downcast_ref::<Self>().unwrap().$idx);
+                )*
+            }
+        }
+    };
+
+    () => {};
+
+    ($head_idx:tt $head_type:ident; $($tail_idx:tt $tail_type:ident;)*) => {
+        impl_resource_for_tuple!{resource: $head_idx $head_type; $($tail_idx $tail_type;)*}
+        impl_resource_for_tuple!{$($tail_idx $tail_type;)*}
+    };
+}
+
+impl_resource_for_tuple!{
+    25 Z; 24 Y; 23 X; 22 W; 21 V; 20 U; 19 T; 18 S; 17 R; 16 Q; 15 P; 14 O; 13 N;
+    12 M; 11 L; 10 K;  9 J;  8 I;  7 H;  6 G;  5 F;  4 E;  3 D;  2 C;  1 B;  0 A;}
+
+impl Clone for Box<Resource> {
+    fn clone(&self) -> Self {
+        self.clone_resource()
+    }
+
+    fn clone_from(&mut self, other: &Box<Resource>) {
+        self.deref_mut().clone_resource_from(other.deref())
+    }
 }
 
 /// The id of a [`Resource`],
@@ -138,8 +224,9 @@ impl Resources {
     /// When you have a resource, simply insert it like this:
     ///
     /// ```rust
-    /// # #[derive(Debug)] struct MyRes(i32);
-    /// use shred::Resources;
+    /// # #[macro_use] extern crate shred_derive;
+    /// use shred::{Resource, Resources};
+    /// # #[derive(Debug, Clone, Resource)] struct MyRes(i32);
     ///
     /// let mut res = Resources::new();
     /// res.insert(MyRes(5));
@@ -256,8 +343,9 @@ mod tests {
     use super::*;
     use {RunNow, System, SystemData};
 
-    #[derive(Default)]
+    #[derive(Default, Clone)]
     struct Res;
+    impl_resource!{Res}
 
     #[test]
     fn fetch_aspects() {
@@ -281,7 +369,9 @@ mod tests {
 
     #[test]
     fn add() {
+        #[derive(Clone)]
         struct Foo;
+        impl_resource!{Foo}
 
         let mut res = Resources::new();
         res.insert(Res);

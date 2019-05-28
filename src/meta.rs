@@ -94,6 +94,7 @@ where
     }
 }
 
+#[derive(Clone)]
 struct Fat(usize);
 
 impl Fat {
@@ -166,7 +167,8 @@ where
 /// # Examples
 ///
 /// ```
-/// use shred::{CastFrom, MetaTable, Resources};
+/// # #[macro_use] extern crate shred_derive;
+/// use shred::{CastFrom, MetaTable, Resource, Resources};
 ///
 /// trait Object {
 ///     fn method1(&self) -> i32;
@@ -187,6 +189,7 @@ where
 ///     }
 /// }
 ///
+/// #[derive(Clone, Resource)]
 /// struct ImplementorA(i32);
 ///
 /// impl Object for ImplementorA {
@@ -199,6 +202,7 @@ where
 ///     }
 /// }
 ///
+/// #[derive(Clone, Resource)]
 /// struct ImplementorB(i32);
 ///
 /// impl Object for ImplementorB {
@@ -232,6 +236,27 @@ pub struct MetaTable<T: ?Sized> {
     tys: Vec<TypeId>,
     // `MetaTable` is invariant over `T`
     marker: PhantomData<Invariant<T>>,
+}
+
+impl<T: ?Sized> Clone for MetaTable<T> {
+    fn clone(&self) -> Self {
+        Self {
+            fat:     self.fat    .clone(),
+            indices: self.indices.clone(),
+            tys:     self.tys    .clone(),
+            marker:  Default::default(),
+        }
+    }
+}
+
+impl<T: ?Sized + 'static> Resource for MetaTable<T> {
+    fn clone_resource(&self) -> Box<::res::Resource> {
+        Box::new(self.clone())
+    }
+
+    fn clone_resource_from(&mut self, other: &::res::Resource) {
+        self.clone_from(other.downcast_ref::<Self>().unwrap())
+    }
 }
 
 impl<T: ?Sized> MetaTable<T> {
@@ -362,7 +387,9 @@ mod tests {
         }
     }
 
+    #[derive(Clone)]
     struct ImplementorA(i32);
+    impl_resource!{ImplementorA}
 
     impl Object for ImplementorA {
         fn method1(&self) -> i32 {
@@ -374,7 +401,9 @@ mod tests {
         }
     }
 
+    #[derive(Clone)]
     struct ImplementorB(i32);
+    impl_resource!{ImplementorB}
 
     impl Object for ImplementorB {
         fn method1(&self) -> i32 {
@@ -414,7 +443,9 @@ mod tests {
         }
     }
 
+    #[derive(Clone)]
     struct ImplementorC;
+    impl_resource!{ImplementorC}
 
     impl Object for ImplementorC {
         fn method1(&self) -> i32 {
@@ -426,7 +457,9 @@ mod tests {
         }
     }
 
+    #[derive(Clone)]
     struct ImplementorD;
+    impl_resource!{ImplementorD}
 
     impl Object for ImplementorD {
         fn method1(&self) -> i32 {

@@ -2,7 +2,7 @@ extern crate shred;
 #[macro_use]
 extern crate shred_derive;
 
-use shred::{Dispatcher, DispatcherBuilder, Read, Resources, RunningTime, System, Write};
+use shred::{Dispatcher, DispatcherBuilder, Read, Resource, Resources, RunningTime, System, Write};
 
 fn sleep_short() {
     use std::thread::sleep;
@@ -11,9 +11,9 @@ fn sleep_short() {
     sleep(Duration::new(0, 1_000));
 }
 
-#[derive(Default)]
+#[derive(Default, Clone, Resource)]
 struct Res;
-#[derive(Default)]
+#[derive(Default, Clone, Resource)]
 struct ResB;
 
 #[derive(SystemData)]

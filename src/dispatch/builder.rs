@@ -27,8 +27,8 @@ use system::{RunNow, System};
 /// # extern crate shred;
 /// # #[macro_use]
 /// # extern crate shred_derive;
-/// # use shred::{Dispatcher, DispatcherBuilder, Read, System};
-/// # #[derive(Debug, Default)] struct Res;
+/// # use shred::{Dispatcher, DispatcherBuilder, Read, Resource, System};
+/// # #[derive(Debug, Default, Clone, Resource)] struct Res;
 /// # #[derive(SystemData)] #[allow(unused)] struct Data<'a> { a: Read<'a, Res> }
 /// # struct Dummy;
 /// # impl<'a> System<'a> for Dummy {
@@ -61,8 +61,8 @@ use system::{RunNow, System};
 /// # extern crate shred;
 /// # #[macro_use]
 /// # extern crate shred_derive;
-/// # use shred::{Dispatcher, DispatcherBuilder, Read, System};
-/// # #[derive(Debug, Default)] struct Res;
+/// # use shred::{Dispatcher, DispatcherBuilder, Read, Resource, System};
+/// # #[derive(Debug, Default, Clone, Resource)] struct Res;
 /// # #[derive(SystemData)] #[allow(unused)] struct Data<'a> { a: Read<'a, Res> }
 /// # struct Dummy;
 /// # impl<'a> System<'a> for Dummy {

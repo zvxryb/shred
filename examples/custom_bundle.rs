@@ -1,11 +1,13 @@
 extern crate shred;
+#[macro_use]
+extern crate shred_derive;
 
-use shred::{Read, ResourceId, Resources, SystemData, Write};
+use shred::{Read, ResourceId, Resources, Resource, SystemData, Write};
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone, Resource)]
 struct ResA;
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone, Resource)]
 struct ResB;
 
 struct ExampleBundle<'a> {

@@ -10,9 +10,10 @@ use res::{FetchMut, Resource, ResourceId};
 /// ## Examples
 ///
 /// ```
-/// use shred::Resources;
+/// # #[macro_use] extern crate shred_derive;
+/// use shred::{Resource, Resources};
 ///
-/// #[derive(Debug)]
+/// #[derive(Debug, Clone, Resource)]
 /// struct Res(i32);
 ///
 /// let mut res = Resources::new();
@@ -66,7 +67,9 @@ mod tests {
 
     #[test]
     fn test_entry() {
+        #[derive(Clone)]
         struct Res;
+        impl_resource!{Res}
 
         let mut res = Resources::new();
         res.entry().or_insert(Res);

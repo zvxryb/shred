@@ -174,8 +174,9 @@ mod tests {
     use res::*;
     use system::*;
 
-    #[derive(Default)]
+    #[derive(Default, Clone)]
     struct Res(i32);
+    impl_resource!{Res}
 
     struct Dummy(i32);
 

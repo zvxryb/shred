@@ -13,10 +13,10 @@
 //!
 //! use shred::{DispatcherBuilder, Read, Resource, Resources, System, Write};
 //!
-//! #[derive(Debug, Default)]
+//! #[derive(Debug, Default, Clone, Resource)]
 //! struct ResA;
 //!
-//! #[derive(Debug, Default)]
+//! #[derive(Debug, Default, Clone, Resource)]
 //! struct ResB;
 //!
 //! #[derive(SystemData)]
@@ -66,11 +66,16 @@ extern crate mopa;
 extern crate rayon;
 extern crate smallvec;
 
+#[cfg(test)]
+#[macro_use]
+extern crate shred_derive;
+
 pub mod cell;
 
+#[macro_use]
+mod res;
 mod dispatch;
 mod meta;
-mod res;
 mod system;
 
 #[cfg(feature = "parallel")]

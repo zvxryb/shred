@@ -1,13 +1,15 @@
 extern crate shred;
+#[macro_use]
+extern crate shred_derive;
 
-use shred::{DispatcherBuilder, Read, Resources, System, Write};
+use shred::{DispatcherBuilder, Read, Resource, Resources, System, Write};
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone, Resource)]
 struct ResA;
 
 // A resource usually has a `Default` implementation
 // which will be used if the resource has not been added.
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone, Resource)]
 struct ResB;
 
 struct PrintSystem;

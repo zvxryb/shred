@@ -395,12 +395,15 @@ mod tests {
             .collect()
     }
 
-    #[derive(Default)]
+    #[derive(Default, Clone)]
     struct ResA;
-    #[derive(Default)]
+    impl_resource!{ResA}
+    #[derive(Default, Clone)]
     struct ResB;
-    #[derive(Default)]
+    impl_resource!{ResB}
+    #[derive(Default, Clone)]
     struct ResC;
+    impl_resource!{ResC}
 
     #[test]
     fn check_intersection_basic() {
