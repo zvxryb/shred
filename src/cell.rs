@@ -185,6 +185,18 @@ impl<T> TrustCell<T> {
     }
 }
 
+impl<T> Clone for TrustCell<T>
+where
+    T: Clone,
+{
+    fn clone(&self) -> Self {
+        Self::new(self.borrow().clone())
+    }
+    fn clone_from(&mut self, other: &Self) {
+        self.borrow_mut().clone_from(&other.borrow())
+    }
+}
+
 unsafe impl<T> Sync for TrustCell<T>
 where
     T: Sync,

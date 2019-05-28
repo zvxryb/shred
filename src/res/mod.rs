@@ -196,7 +196,7 @@ impl ResourceId {
 /// # Resource Ids
 ///
 /// Resources are identified by `ResourceId`s, which consist of a `TypeId`.
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct Resources {
     resources: FxHashMap<ResourceId, TrustCell<Box<Resource>>>,
 }
