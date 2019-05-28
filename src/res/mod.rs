@@ -156,6 +156,19 @@ impl_resource_for_tuple!{
     25 Z; 24 Y; 23 X; 22 W; 21 V; 20 U; 19 T; 18 S; 17 R; 16 Q; 15 P; 14 O; 13 N;
     12 M; 11 L; 10 K;  9 J;  8 I;  7 H;  6 G;  5 F;  4 E;  3 D;  2 C;  1 B;  0 A;}
 
+impl<T> Resource for Vec<T>
+where
+    T: Clone + Send + Sync + 'static,
+{
+    fn clone_resource(&self) -> Box<Resource> {
+        Box::new(self.clone())
+    }
+
+    fn clone_resource_from(&mut self, other: &Resource) {
+        self.clone_from(other.downcast_ref::<Vec<T>>().unwrap())
+    }
+}
+
 impl Clone for Box<Resource> {
     fn clone(&self) -> Self {
         self.clone_resource()
