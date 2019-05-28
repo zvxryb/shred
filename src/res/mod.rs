@@ -15,11 +15,8 @@ use self::entry::create_entry;
 use cell::{Ref, RefMut, TrustCell};
 
 macro_rules! impl_resource {
-    ($name:ty, ($($impl_generics:tt)*), ($($ty_generics:tt)*), ($($where_clause:tt)*)) => {
-        impl $($impl_generics)*
-            ::res::Resource
-            for $name $($ty_generics)* $($where_clause)*
-        {
+    ($name:ty) => {
+        impl ::res::Resource for $name {
             fn clone_resource(&self) -> Box<::res::Resource> {
                 Box::new(self.clone())
             }
@@ -28,10 +25,6 @@ macro_rules! impl_resource {
                 self.clone_from(other.downcast_ref::<$name>().unwrap())
             }
         }
-    };
-    
-    ($name:ty) => {
-        impl_resource!{$name, (), (), ()}
     };
 }
 

@@ -163,7 +163,6 @@ fn impl_resource(ast: &DeriveInput) -> proc_macro2::TokenStream {
     let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
 
     quote! {
-        //impl_resource!{#name, (#impl_generics), (#ty_generics), (#where_clause)}
         impl #impl_generics
             ::shred::Resource
             for #name #ty_generics #where_clause
@@ -174,7 +173,7 @@ fn impl_resource(ast: &DeriveInput) -> proc_macro2::TokenStream {
 
             fn clone_resource_from(&mut self, other: &Resource) {
                 ::std::clone::Clone::clone_from(self,
-                    other.downcast_ref::<#name>().unwrap())
+                    other.downcast_ref::<#name #ty_generics>().unwrap())
             }
         }
     }
